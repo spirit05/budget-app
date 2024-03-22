@@ -2,11 +2,16 @@
   <div class="budget-list-wrapper">
     <ElCard :header="header">
         <template v-if="!isEmpty">
-            <!-- <FilterGroup @showAll="showAll" @showIncome="onShowIncome" @showOutcome="onShowOutcome"/> -->
-            
-            <FilterGroup @filter="filteredListHandler"/>
-            <div v-for="(item, prop) in filteredList" :key="prop">
-                <BudgetListItem @deleteItem="onDeleteItem" :comment="item.comment" :value="item.value" :id="item.id" />
+            <div class="filter-group">
+                <ElButton 
+                    size="mini" 
+                    v-for="(n, i) in filters" 
+                    @click="changeFilter"
+                    :key="i"
+                >{{ n.name }}</ElButton>
+            </div>
+            <div v-for="(item, prop) in filtered" :key="prop">
+                <BudgetListItem :comment="item.comment" :value="item.value" :id="item.id" />
             </div>
         </template>
         <ElAlert v-else type="info" :title="emptyTitle" :closable="false" />
@@ -15,56 +20,40 @@
 </template>
 
 <script>
+    import { mapGetters } from 'vuex';
     import BudgetListItem from "@/components/BudgetListItem.vue"
-    import FilterGroup from "@/components/FilterGroup.vue"
 
     export default {
         name: 'BudgetList',
         components: {
-            FilterGroup,
             BudgetListItem,
         },
-        props: {
-            list: {
-                type: Object,
-                default: () => ({})
-            }
-        },
         data: () => ({
-            filtered: [],
+            filters: [
+                { name: 'All' },
+                { name: 'Income'},
+                { name: 'Outcome'},
+            ],
+            filteredBy: '',
             header: "Budget List",
             emptyTitle: 'Empty List'
         }),
         computed: {
+            ...mapGetters('budgets', ['budgetList']),
             isEmpty() {
-                return !Object.keys(this.list).length
+                return !Object.keys(this.budgetList).length
             },
-            filteredList: {
-                get() {
-                    if (!this.filtered.length) return this.list
-                    return this.filtered
-                },
-                set(value) {
-                    this.filtered = value
-                }
-            }
+            filtered() {
+                return this.filteredBy && this.filteredBy !== 'ALL'
+                    ? Object.values(this.budgetList).filter(({ type }) => type === this.filteredBy)
+                    : { ...this.budgetList}
+            },
         },
         methods: {
-            onDeleteItem(id) {
-                this.$emit("deleteItem", id)
-            },
-            filteredListHandler(sortBy) {
-                if (sortBy === 'in') {
-                    this.filteredList = Object.values(this.list).filter(item => item.type === "INCOME")
-                    return
-                } 
-                if (sortBy === 'out') {
-                    this.filteredList = Object.values(this.list).filter(item => item.type === "OUTCOME")
-                    return
-                } 
-                this.filteredList = this.list
-            },
-        },
+            changeFilter(e) {
+                this.filteredBy = e.target.textContent.toUpperCase()
+            }
+        }
     }
 </script>
 

@@ -3,11 +3,13 @@
         <i :class="chooseTopBottomIcon" :style="{ color: chooseColor }"></i>
         <span class="budget-comment">{{ comment }}</span>
         <span class="budget-value" :style="{ color: chooseColor }">{{ value }}</span>
-        <ElButton type="danger" size="mini" @click="onDeleteItem(id)">Delete</ElButton>
+        <ElButton type="danger" size="mini" @click="deleteItem(id)">Delete</ElButton>
     </div>
 </template>
 
 <script>
+    import { mapActions } from 'vuex';
+
     export default {
         name: "BudgetListItem",
         props: {
@@ -44,9 +46,7 @@
             }
         },
         methods: {
-            onDeleteItem(id) {
-                this.$emit("deleteItem", id)
-            }
+            ...mapActions('budgets', ['deleteItem'])
         }
     }
 </script>

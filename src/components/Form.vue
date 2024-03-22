@@ -19,12 +19,14 @@
 </template>
 
 <script>
+    import { mapActions } from 'vuex';
+
     export default {
         name: "FormItem",
         data() {
             const checkValue = (rule, value, cb) => {
-                if (this.formData.type === "OUTCOME" && value >= 0) {
-                    return cb(new Error("Value for outcome type must be less of zero"))
+                if (this.formData.type === "OUTCOME" && value === 0) {
+                    return cb(new Error("Value for outcome type should not be equal to zero"))
                 }
                 if (this.formData.type === "INCOME" && value <= 0) {
                     return cb(new Error("Value for income type must be greatest of zero"))
@@ -58,10 +60,14 @@
             }
         },
         methods: {
+            ...mapActions('budgets', ['addItem']),
             onSubmit() {
                 this.$refs.addItemForm.validate(valid => {
                     if (valid) {
-                        this.$emit("submitForm", { ...this.formData})
+                        if (this.formData.type === 'OUTCOME' && this.formData.value > 0) {
+                            this.formData.value *= -1
+                        }
+                        this.addItem(this.formData)
                         this.$refs.addItemForm.resetFields()
                     }
                 })

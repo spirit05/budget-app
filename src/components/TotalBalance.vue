@@ -1,22 +1,19 @@
 <template>
-  <div class="total-value" :style="{ color: checkTotalColor}">Balance: {{ total }}</div>
+  <div class="total-value" :style="{ color: checkTotalColor}">Balance: {{ totalBalance }}</div>
 </template>
 
 <script>
+    import { mapGetters } from 'vuex';
+
     export default {
         name: "TotalBalance",
-        props: {
-            total: {
-                type: Number,
-                default: 0
-            }
-        },
         computed: {
+            ...mapGetters('budgets', ['totalBalance']),
             checkTotalColor() {
-                if (this.total === 0) {
+                if (this.totalBalance === 0) {
                     return 'black'
                 }
-                if (this.total < 0) {
+                if (this.totalBalance < 0) {
                     return 'red'
                 }
                 return 'green'
